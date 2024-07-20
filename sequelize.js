@@ -40,8 +40,8 @@ const User = sequelize.define("User", {
 // Sync models
 const syncModels = async () => {
   try {
-    await sequelize.sync({ force: true });
-    logger.info("Database & tables created!");
+    await sequelize.sync({ alter: true });
+    logger.info("Database & tables updated!");
   } catch (error) {
     logger.error("Error syncing models:", error);
   }
