@@ -3,7 +3,7 @@ require("dotenv").config();
 const fs = require("fs");
 
 // Log dizinini oluşturun (varsa) veya oluşturun
-const logDirectory = process.env.LOG_DIR || "logs";
+const logDirectory = process.env.LOG_DIR || "/logs";
 const filename = process.env.LOG_FILE || "combined.log";
 if (!fs.existsSync(logDirectory)) {
   fs.mkdirSync(logDirectory);

@@ -11,7 +11,7 @@ services:
       - db
       - redis
     volumes:
-      - logs:/app/logs # Log dosyalarını dışa aktarıyoruz
+      - app-logs:/logs # Log dosyalarını dışa aktarıyoruz
     restart: unless-stopped # Servisi yeniden başlatma politikası ekleyin
 
   db:
@@ -37,4 +37,4 @@ services:
 volumes:
   postgres-data:
   redis-data:
-  logs:
+  app_logs:
