@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./logs:/app/logs # Log dosyalarını dışa aktarıyoruz
+    restart: unless-stopped # Servisi yeniden başlatma politikası ekleyin
+
+  db:
+    image: postgres:15 # Belirli bir sürüm belirtin
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped # Servisi yeniden başlatma politikası ekleyin
+
+  redis:
+    image: redis:7 # Belirli bir sürüm belirtin
+    ports:
+      - "6379:6379"
+    restart: unless-stopped # Servisi yeniden başlatma politikası ekleyin
+
+volumes:
+  postgres-data:
