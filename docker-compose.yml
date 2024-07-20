@@ -59,6 +59,8 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
+    volumes:
+      - ./datasource.json:/etc/grafana/provisioning/datasources/datasource.json
     restart: unless-stopped
 
 volumes:
