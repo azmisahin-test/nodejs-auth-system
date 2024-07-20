@@ -47,6 +47,10 @@
         .response {
             margin-top: 20px;
         }
+
+        .error {
+            color: red;
+        }
     </style>
 </head>
 
@@ -86,6 +90,7 @@
                 permissions = JSON.parse(permissionsText);
             } catch (e) {
                 document.getElementById('response').textContent = 'Invalid JSON format in permissions.';
+                document.getElementById('response').className = 'response error';
                 return;
             }
 
@@ -100,8 +105,10 @@
                 }
                 const data = await response.json();
                 document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('response').className = 'response';
             } catch (error) {
                 document.getElementById('response').textContent = `Error creating user: ${error.message}`;
+                document.getElementById('response').className = 'response error';
             }
         }
 
@@ -114,9 +121,11 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('permissions').value = JSON.stringify(data, null, 2);
+                document.getElementById('response').className = 'response';
             } catch (error) {
                 document.getElementById('response').textContent = `Error retrieving permissions: ${error.message}`;
+                document.getElementById('response').className = 'response error';
             }
         }
 
@@ -129,6 +138,7 @@
                 permissions = JSON.parse(permissionsText);
             } catch (e) {
                 document.getElementById('response').textContent = 'Invalid JSON format in permissions.';
+                document.getElementById('response').className = 'response error';
                 return;
             }
 
@@ -143,8 +153,10 @@
                 }
                 const data = await response.json();
                 document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('response').className = 'response';
             } catch (error) {
                 document.getElementById('response').textContent = `Error updating permissions: ${error.message}`;
+                document.getElementById('response').className = 'response error';
             }
         }
     </script>
