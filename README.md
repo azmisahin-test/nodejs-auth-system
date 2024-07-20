@@ -41,5 +41,5 @@ This application is a Node.js-based web server that manages user permissions usi
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-repo
+   git clone https://github.com/azmisahin-test/nodejs-auth-system.git
+   cd nodejs-auth-system
