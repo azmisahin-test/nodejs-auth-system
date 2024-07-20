@@ -34,7 +34,34 @@ services:
       - redis-data:/data # Redis verilerini kalıcı hale getiriyoruz
     restart: unless-stopped # Servisi yeniden başlatma politikası ekleyin
 
+  redis-exporter:
+    image: oliver006/redis_exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    depends_on:
+      - redis
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/prometheus.yml
+    command:
+      - --config.file=/prometheus.yml
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   redis-data:
-  app_logs:
+  app-logs:
