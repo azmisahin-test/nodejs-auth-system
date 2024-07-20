@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth System UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .response {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>User Management</h1>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+            <label for="permissions">Permissions (JSON)</label>
+            <textarea id="permissions" rows="4"
+                placeholder='Enter permissions as JSON (e.g., {"read": true, "write": false})'></textarea>
+        </div>
+        <div class="form-group">
+            <button onclick="createUser()">Create User</button>
+        </div>
+        <div class="form-group">
+            <button onclick="getPermissions()">Get Permissions</button>
+        </div>
+        <div class="form-group">
+            <button onclick="updatePermissions()">Update Permissions</button>
+        </div>
+        <div class="response">
+            <pre id="response"></pre>
+        </div>
+    </div>
+
+    <script>
+        async function createUser() {
+            const username = document.getElementById('username').value;
+            const permissionsText = document.getElementById('permissions').value;
+            let permissions;
+
+            try {
+                permissions = JSON.parse(permissionsText);
+            } catch (e) {
+                document.getElementById('response').textContent = 'Invalid JSON format in permissions.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, permissions })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('response').textContent = `Error creating user: ${error.message}`;
+            }
+        }
+
+        async function getPermissions() {
+            const username = document.getElementById('username').value;
+
+            try {
+                const response = await fetch(`/users/${username}/permissions`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('response').textContent = `Error retrieving permissions: ${error.message}`;
+            }
+        }
+
+        async function updatePermissions() {
+            const username = document.getElementById('username').value;
+            const permissionsText = document.getElementById('permissions').value;
+            let permissions;
+
+            try {
+                permissions = JSON.parse(permissionsText);
+            } catch (e) {
+                document.getElementById('response').textContent = 'Invalid JSON format in permissions.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/users/${username}/permissions`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ permissions })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('response').textContent = `Error updating permissions: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,12 +1,17 @@
 const express = require("express");
 require("dotenv").config();
 const { testConnection, syncModels, User } = require("./sequelize");
-const { setPermissions, getPermissions } = require("./cache");
+const {
+  setPermissions,
+  getPermissions,
+  setUserIdByUsername,
+} = require("./cache");
 const createLogger = require("./logger");
 const logger = createLogger("SVR");
 
 const app = express();
 app.use(express.json());
+app.use(express.static("public")); // Serve static files from the "public" directory
 
 const PORT = process.env.PORT || 3000;
 
@@ -30,7 +35,8 @@ app.post("/users", async (req, res) => {
   try {
     const user = await User.create({ username, permissions });
     logger.info(`User created with ID: ${user.id}`);
-    await setPermissions(user.id, permissions);
+    await setUserIdByUsername(username, user.id);
+    await setPermissions(username, permissions);
     res.status(201).json(user);
   } catch (err) {
     logger.error("Error creating user:", err.message);
@@ -38,37 +44,42 @@ app.post("/users", async (req, res) => {
   }
 });
 
-app.put("/users/:id/permissions", async (req, res) => {
-  const userId = req.params.id;
+app.put("/users/:username/permissions", async (req, res) => {
+  const username = req.params.username;
   const { permissions } = req.body;
   logger.info(
-    `PUT /users/${userId}/permissions - Updating permissions to: ${JSON.stringify(
+    `PUT /users/${username}/permissions - Updating permissions to: ${JSON.stringify(
       permissions
     )}`
   );
   try {
-    await User.update({ permissions }, { where: { id: userId } });
-    logger.info(`Permissions updated for user ID: ${userId}`);
-    await setPermissions(userId, permissions);
-    res.status(200).json({ message: "Permissions updated" });
+    const user = await User.findOne({ where: { username } });
+    if (user) {
+      await User.update({ permissions }, { where: { username } });
+      logger.info(`Permissions updated for user: ${username}`);
+      await setPermissions(username, permissions);
+      res.status(200).json({ message: "Permissions updated" });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
   } catch (err) {
     logger.error("Error updating permissions:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get("/users/:id/permissions", async (req, res) => {
-  const userId = req.params.id;
-  logger.info(`GET /users/${userId}/permissions - Retrieving permissions`);
+app.get("/users/:username/permissions", async (req, res) => {
+  const username = req.params.username;
+  logger.info(`GET /users/${username}/permissions - Retrieving permissions`);
   try {
-    let permissions = await getPermissions(userId);
+    let permissions = await getPermissions(username);
     if (!permissions) {
       logger.info("Cache miss - fetching from database");
-      const user = await User.findByPk(userId);
+      const user = await User.findOne({ where: { username } });
       permissions = user ? user.permissions : null;
       if (permissions) {
         logger.info("Caching permissions");
-        await setPermissions(userId, permissions);
+        await setPermissions(username, permissions);
       } else {
         logger.info("User not found");
       }
